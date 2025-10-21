@@ -744,9 +744,9 @@ const DashboardPage = () => {
                 <input
                   type="text"
                   value={durationUnit}
-                  onChange={(e) => setDurationUnit(e.target.value)}
+                  readOnly
                   onKeyDown={handleUnitKeyDown}
-                  className="px-4 py-2 text-2xl font-bold border-b-2 border-gray-300 focus:border-indigo-600 outline-none"
+                  className="px-4 py-2 text-2xl font-bold border-b-2 border-gray-300 focus:border-indigo-600 outline-none cursor-pointer"
                   autoFocus
                 />
               </div>
