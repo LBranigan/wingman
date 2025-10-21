@@ -8,6 +8,7 @@ import { auth } from '../services/api';
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true); // Default to true for better UX
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -23,6 +24,15 @@ const LoginPage = () => {
 
     try {
       await login({ email, password });
+
+      // If "Remember me" is checked, store a flag in localStorage
+      // This can be used by the app to persist the session longer
+      if (rememberMe) {
+        localStorage.setItem('rememberMe', 'true');
+      } else {
+        localStorage.removeItem('rememberMe');
+      }
+
       toast.success('Welcome back! 👋');
       navigate('/');
     } catch (err) {
@@ -94,6 +104,19 @@ const LoginPage = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               placeholder="••••••••"
             />
+          </div>
+
+          <div className="flex items-center">
+            <input
+              id="remember-me"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
+            />
+            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 cursor-pointer">
+              Remember me
+            </label>
           </div>
 
           <button
