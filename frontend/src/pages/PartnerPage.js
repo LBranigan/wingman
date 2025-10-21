@@ -175,13 +175,13 @@ const PartnerPage = () => {
     }
   };
 
-  const handleUnmatch = async () => {
-    if (!window.confirm(`Are you sure you want to unmatch from ${user.partner.name}? This will remove the partnership for both of you.`)) {
+  const handleUnmatch = async (partnerId, partnerName) => {
+    if (!window.confirm(`Are you sure you want to unmatch from ${partnerName}? This will remove the partnership for both of you.`)) {
       return;
     }
 
     try {
-      await matchApi.unmatch();
+      await matchApi.unmatch(partnerId);
       toast.success('Successfully unmatched');
       await refreshUser();
     } catch (err) {
@@ -360,34 +360,72 @@ const PartnerPage = () => {
         </div>
       )}
 
+      {/* Display all partners */}
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-3xl text-white">
-              👤
+        <h3 className="text-xl font-bold text-gray-800 mb-4">
+          Your Partners ({user.partners?.length || (user.partner ? 1 : 0)})
+        </h3>
+
+        {(user.partners || [user.partner]).filter(Boolean).map((partner) => (
+          <div key={partner.id} className="flex items-center justify-between gap-4 mb-4 last:mb-0 pb-4 last:pb-0 border-b last:border-b-0">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-3xl text-white">
+                {partner.profilePicture ? (
+                  <img src={partner.profilePicture} alt={partner.name} className="w-full h-full rounded-full object-cover" />
+                ) : '👤'}
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">{partner.name}</h2>
+                <p className="text-gray-600 text-sm">{partner.bio}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">{user.partner.name}</h2>
-              <p className="text-gray-600">{user.partner.bio}</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => navigate('/partner/chat')}
+                className="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition font-medium flex items-center gap-2"
+              >
+                <MessageCircle size={16} />
+                Chat
+              </button>
+              <button
+                onClick={() => handleUnmatch(partner.id, partner.name)}
+                className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 border border-red-300 rounded-lg transition font-medium"
+              >
+                Unmatch
+              </button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => navigate('/partner/chat')}
-              className="px-6 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition font-medium flex items-center gap-2"
-            >
-              <MessageCircle size={18} />
-              Open Chat
-            </button>
-            <button
-              onClick={handleUnmatch}
-              className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 border border-red-300 rounded-lg transition font-medium"
-            >
-              Unmatch
-            </button>
+        ))}
+      </div>
+
+      {/* Show Pending Invitations */}
+      {user.pendingInvitations && user.pendingInvitations.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">
+            Pending Invitations ({user.pendingInvitations.length})
+          </h3>
+          <p className="text-gray-600 text-sm mb-4">
+            You've invited these people to be your accountability partners. They'll automatically become your partner when they sign up.
+          </p>
+          <div className="space-y-3">
+            {user.pendingInvitations.map((invite) => (
+              <div key={invite.id} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-gray-800">{invite.email}</p>
+                    <p className="text-sm text-gray-500">
+                      Sent {new Date(invite.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full font-medium">
+                    Pending
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h3 className="text-xl font-bold text-gray-800 mb-4">This Week's Goals</h3>
