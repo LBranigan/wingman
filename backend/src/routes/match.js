@@ -16,22 +16,22 @@ router.get('/suggestions', authMiddleware, async (req, res) => {
 
     const currentUser = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: { id: true, bio: true, partnerId: true, name: true }
+      select: { id: true, bio: true, name: true }
     });
 
-    console.log('[SUGGESTIONS] Current user:', { id: currentUser.id, name: currentUser.name, partnerId: currentUser.partnerId });
+    console.log('[SUGGESTIONS] Current user:', { id: currentUser.id, name: currentUser.name });
 
-    if (currentUser.partnerId) {
-      console.log('[SUGGESTIONS] User already has partner:', currentUser.partnerId);
-      return res.status(400).json({ error: 'Already matched with a partner' });
-    }
+    // Get current user's partners to exclude them
+    const { getUserPartners } = require('../utils/partnerships');
+    const existingPartners = await getUserPartners(req.userId);
+    const partnerIds = existingPartners.map(p => p.id);
 
-    // Get all unmatched users
+    // Get all users excluding self and existing partners
     const allUsers = await prisma.user.findMany({
       where: {
         AND: [
           { id: { not: req.userId } },
-          { partnerId: null }
+          { id: { notIn: partnerIds } }
         ]
       },
       select: {
@@ -248,27 +248,17 @@ router.post('/requests/:requestId/reject', authMiddleware, async (req, res) => {
   }
 });
 
-// Unmatch
+// Unmatch - now requires partnerId in body to specify which partner to remove
 router.post('/unmatch', authMiddleware, async (req, res) => {
   try {
-    const currentUser = await prisma.user.findUnique({
-      where: { id: req.userId }
-    });
+    const { partnerId } = req.body;
 
-    if (!currentUser.partnerId) {
-      return res.status(400).json({ error: 'No partner to unmatch' });
+    if (!partnerId) {
+      return res.status(400).json({ error: 'Partner ID is required' });
     }
 
-    // Remove partnership
-    await prisma.user.update({
-      where: { id: req.userId },
-      data: { partnerId: null, matchedAt: null }
-    });
-
-    await prisma.user.update({
-      where: { id: currentUser.partnerId },
-      data: { partnerId: null, matchedAt: null }
-    });
+    // Remove partnership using new Partnership model
+    await deletePartnership(req.userId, partnerId);
 
     res.json({ message: 'Successfully unmatched' });
   } catch (error) {
@@ -297,16 +287,10 @@ router.post('/invite', authMiddleware, async (req, res) => {
     // Get current user
     const currentUser = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: { id: true, name: true, partnerId: true, email: true }
+      select: { id: true, name: true, email: true }
     });
 
-    console.log('[INVITE] Current user:', { id: currentUser.id, name: currentUser.name, partnerId: currentUser.partnerId });
-
-    // Check if user already has a partner
-    if (currentUser.partnerId) {
-      console.log('[INVITE] User already has partner:', currentUser.partnerId);
-      return res.status(400).json({ error: 'You already have a partner. Unmatch first before sending invitations.' });
-    }
+    console.log('[INVITE] Current user:', { id: currentUser.id, name: currentUser.name });
 
     // Check if email is already registered
     const existingUser = await prisma.user.findUnique({
