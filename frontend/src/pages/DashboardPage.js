@@ -126,6 +126,15 @@ const DashboardPage = () => {
       e.preventDefault();
       setDateRangeStep('done');
       setActiveGoalIndex(0);
+    } else if (e.key.toLowerCase() === 'd') {
+      e.preventDefault();
+      setDurationUnit('day');
+    } else if (e.key.toLowerCase() === 'w') {
+      e.preventDefault();
+      setDurationUnit('week');
+    } else if (e.key.toLowerCase() === 'm') {
+      e.preventDefault();
+      setDurationUnit('month');
     }
   };
 
@@ -732,7 +741,7 @@ const DashboardPage = () => {
                 />
               </div>
               <p className="text-sm text-gray-500 mt-2">
-                Press Enter or Tab to continue, or arrow up/down to select: day, week, month
+                Type D/W/M or use arrow keys to select • Press Enter or Tab to continue
               </p>
             </div>
           )}
