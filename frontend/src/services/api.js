@@ -48,7 +48,7 @@ export const match = {
   getRequests: () => api.get('/match/requests'),
   acceptRequest: (requestId) => api.post(`/match/requests/${requestId}/accept`),
   rejectRequest: (requestId) => api.post(`/match/requests/${requestId}/reject`),
-  unmatch: () => api.post('/match/unmatch'),
+  unmatch: (partnerId) => api.post('/match/unmatch', partnerId ? { partnerId } : {}), // Support both old and new API
   invite: (email) => api.post('/match/invite', { email })
 };
 
