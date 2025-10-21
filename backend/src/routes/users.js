@@ -2,6 +2,7 @@ const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const authMiddleware = require('../middleware/auth');
 const { validate } = require('../middleware/validation');
+const { getUserPartners, getUserSentInvitations } = require('../utils/partnerships');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -17,26 +18,23 @@ router.get('/me', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Manually fetch partner if partnerId exists
-    let partner = null;
-    if (user.partnerId) {
-      partner = await prisma.user.findUnique({
-        where: { id: user.partnerId },
-        select: {
-          id: true,
-          name: true,
-          bio: true,
-          email: true
-        }
-      });
-    }
+    // Fetch all partners using new Partnership model
+    const partners = await getUserPartners(req.userId);
+
+    // Fetch pending invitations
+    const pendingInvitations = await getUserSentInvitations(req.userId);
 
     // Don't send password
     const { password, ...userWithoutPassword } = user;
 
+    // For backward compatibility, set `partner` to first partner if exists
+    const partner = partners.length > 0 ? partners[0] : null;
+
     res.json({
       ...userWithoutPassword,
-      partner
+      partner,      // Single partner for backward compatibility
+      partners,     // Array of all partners
+      pendingInvitations  // Array of pending email invitations
     });
   } catch (error) {
     console.error(error);

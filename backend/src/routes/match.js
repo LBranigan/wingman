@@ -3,6 +3,7 @@ const { PrismaClient } = require('@prisma/client');
 const authMiddleware = require('../middleware/auth');
 const { sendPartnerInvitation } = require('../services/emailService');
 const { findTopMatches } = require('../utils/compatibilityScore');
+const { createPartnership, deletePartnership, arePartners } = require('../utils/partnerships');
 const crypto = require('crypto');
 
 const router = express.Router();
@@ -189,31 +190,8 @@ router.post('/requests/:requestId/accept', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Request is no longer pending' });
     }
 
-    // Check if either user already has a partner
-    if (request.sender.partnerId || request.receiver.partnerId) {
-      return res.status(400).json({ error: 'One of the users already has a partner' });
-    }
-
-    // Create mutual partnership and clear any invitation tokens
-    await prisma.user.update({
-      where: { id: request.senderId },
-      data: {
-        partnerId: request.receiverId,
-        matchedAt: new Date(),
-        invitationToken: null,
-        invitationSentAt: null
-      }
-    });
-
-    await prisma.user.update({
-      where: { id: request.receiverId },
-      data: {
-        partnerId: request.senderId,
-        matchedAt: new Date(),
-        invitationToken: null,
-        invitationSentAt: null
-      }
-    });
+    // Create partnership using new Partnership model
+    await createPartnership(request.senderId, request.receiverId);
 
     // Update request status
     await prisma.partnershipRequest.update({
@@ -343,16 +321,17 @@ router.post('/invite', authMiddleware, async (req, res) => {
     // Generate unique invitation token
     const invitationToken = crypto.randomBytes(32).toString('hex');
 
-    // Store invitation info on the inviter
-    await prisma.user.update({
-      where: { id: req.userId },
+    // Create invitation record in new Invitation model
+    await prisma.invitation.create({
       data: {
+        email,
         invitationToken,
-        invitationSentAt: new Date()
+        senderId: req.userId,
+        status: 'pending'
       }
     });
 
-    console.log('[INVITE] Invitation token generated and stored');
+    console.log('[INVITE] Invitation record created');
 
     // Generate invitation URL
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';

@@ -27,15 +27,19 @@ router.post('/register', validate('register'), async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // If there's an invitation token, find the inviter
-    let inviterId = null;
+    // If there's an invitation token, find the invitation
+    let invitation = null;
     if (inviteToken) {
-      const inviter = await prisma.user.findUnique({
-        where: { invitationToken: inviteToken }
+      invitation = await prisma.invitation.findUnique({
+        where: { invitationToken: inviteToken },
+        include: { sender: true }
       });
 
-      if (inviter && !inviter.partnerId) {
-        inviterId = inviter.id;
+      // Verify invitation is valid and matches email
+      if (invitation && invitation.status === 'pending' && invitation.email === email) {
+        // Valid invitation
+      } else {
+        invitation = null; // Invalid or mismatched invitation
       }
     }
 
@@ -45,28 +49,28 @@ router.post('/register', validate('register'), async (req, res) => {
         email,
         password: hashedPassword,
         name,
-        bio,
-        invitedBy: inviterId
+        bio
       }
     });
 
     // If this user was invited, create the partnership automatically
-    if (inviterId) {
-      await prisma.user.update({
-        where: { id: user.id },
+    if (invitation) {
+      // Create partnership using new Partnership model
+      const [user1Id, user2Id] = [invitation.senderId, user.id].sort();
+
+      await prisma.partnership.create({
         data: {
-          partnerId: inviterId,
-          matchedAt: new Date()
+          user1Id,
+          user2Id
         }
       });
 
-      await prisma.user.update({
-        where: { id: inviterId },
+      // Mark invitation as accepted
+      await prisma.invitation.update({
+        where: { id: invitation.id },
         data: {
-          partnerId: user.id,
-          matchedAt: new Date(),
-          invitationToken: null,
-          invitationSentAt: null
+          status: 'accepted',
+          acceptedAt: new Date()
         }
       });
     }
@@ -86,7 +90,7 @@ router.post('/register', validate('register'), async (req, res) => {
         name: user.name,
         bio: user.bio
       },
-      partnershipCreated: !!inviterId
+      partnershipCreated: !!invitation
     });
   } catch (error) {
     console.error(error);
