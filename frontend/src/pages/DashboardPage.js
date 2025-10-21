@@ -17,11 +17,8 @@ const formatDateRange = (startDate, endDate) => {
   const endMonth = end.toLocaleDateString('en-US', { month: 'short' });
   const endDay = end.getDate();
 
-  if (startMonth === endMonth) {
-    return `${startMonth} ${startDay} - ${endDay}`;
-  } else {
-    return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
-  }
+  // Always show both months for clarity
+  return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
 };
 
 const DashboardPage = () => {
