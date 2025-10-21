@@ -105,7 +105,7 @@ const DashboardPage = () => {
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       setDurationNumber(prev => Math.max(1, prev - 1));
-    } else if (e.key === 'Enter') {
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
       setDateRangeStep('unit');
     }
@@ -122,7 +122,7 @@ const DashboardPage = () => {
       const units = ['day', 'week', 'month'];
       const currentIndex = units.indexOf(durationUnit);
       setDurationUnit(units[(currentIndex + 1) % 3]);
-    } else if (e.key === 'Enter') {
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
       setDateRangeStep('done');
       setActiveGoalIndex(0);
@@ -130,7 +130,7 @@ const DashboardPage = () => {
   };
 
   const handleGoalKeyDown = (e, index) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
       const newGoalsList = [...newGoals];
       if (index === newGoals.length - 1) {
@@ -236,8 +236,16 @@ const DashboardPage = () => {
   };
 
   const calculateDuration = () => {
-    const multiplier = durationUnit === 'day' ? 1 : durationUnit === 'week' ? 7 : 30;
-    return durationNumber * multiplier * 24 * 60 * 60 * 1000;
+    if (durationUnit === 'day') {
+      return durationNumber * 24 * 60 * 60 * 1000;
+    } else if (durationUnit === 'week') {
+      return durationNumber * 7 * 24 * 60 * 60 * 1000;
+    } else if (durationUnit === 'month') {
+      // For months, calculate based on actual month length
+      const endDate = new Date();
+      endDate.setMonth(endDate.getMonth() + durationNumber);
+      return endDate.getTime() - Date.now();
+    }
   };
 
   const handleToggleGoal = async (goalId, setId) => {
@@ -696,14 +704,15 @@ const DashboardPage = () => {
                   value={durationNumber}
                   onChange={handleNumberChange}
                   onKeyDown={handleNumberKeyDown}
+                  onFocus={(e) => e.target.select()}
                   className="w-24 px-4 py-2 text-2xl font-bold border-b-2 border-gray-300 focus:border-indigo-600 outline-none text-center"
                   autoFocus
                   min="1"
                   max="999"
                 />
-                <span className="text-xl text-gray-600">{durationUnit}{durationNumber > 1 ? 's' : ''}</span>
+                <span className="text-xl text-gray-600">{durationNumber > 1 ? `${durationUnit}s` : durationUnit}</span>
               </div>
-              <p className="text-sm text-gray-500 mt-2">Press Enter to continue, or use arrow keys to adjust</p>
+              <p className="text-sm text-gray-500 mt-2">Press Enter or Tab to continue, or use arrow keys to adjust</p>
             </div>
           )}
 
@@ -721,7 +730,7 @@ const DashboardPage = () => {
                 />
               </div>
               <p className="text-sm text-gray-500 mt-2">
-                Press Enter to continue, or arrow up/down to select: day, week, month
+                Press Enter or Tab to continue, or arrow up/down to select: day, week, month
               </p>
             </div>
           )}
@@ -729,7 +738,7 @@ const DashboardPage = () => {
           {dateRangeStep === 'done' && (
             <div className="space-y-3">
               <p className="text-sm text-gray-600 mb-4">
-                Duration: {durationNumber} {durationUnit}{durationNumber > 1 ? 's' : ''}
+                Duration: {durationNumber} {durationNumber > 1 ? `${durationUnit}s` : durationUnit}
               </p>
 
               {newGoals.map((goal, index) => (
