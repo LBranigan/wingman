@@ -24,11 +24,30 @@ const AuthCallbackPage = () => {
           // Store the token and get user info
           localStorage.setItem('token', token);
 
-          // If your AuthContext has a method to set auth state, use it
-          // Otherwise, just redirect and let the app re-initialize
-          toast.success('Welcome! 👋');
-          navigate('/');
-          window.location.reload(); // Refresh to update auth state
+          // Fetch user data to check if bio is empty
+          const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/me`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (response.ok) {
+            const userData = await response.json();
+
+            // Check if user needs to complete their bio
+            if (!userData.bio || userData.bio.trim() === '') {
+              toast.success('Welcome! Please tell us about yourself 👋');
+              navigate('/register?step=bio');
+            } else {
+              toast.success('Welcome back! 👋');
+              navigate('/');
+            }
+            window.location.reload(); // Refresh to update auth state
+          } else {
+            toast.error('Failed to fetch user data');
+            navigate('/');
+            window.location.reload();
+          }
         } catch (err) {
           toast.error('Failed to complete authentication');
           navigate('/login');
