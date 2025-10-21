@@ -120,8 +120,20 @@ const PartnerPage = () => {
 
     setSendingInvite(true);
     try {
-      await matchApi.invite(inviteEmail);
-      toast.success(`Invitation sent to ${inviteEmail}! 📧`);
+      const response = await matchApi.invite(inviteEmail);
+      const { invitationUrl, emailSent } = response.data;
+
+      // Copy invitation link to clipboard
+      if (navigator.clipboard && invitationUrl) {
+        await navigator.clipboard.writeText(invitationUrl);
+      }
+
+      if (emailSent) {
+        toast.success(`Invitation sent to ${inviteEmail}! 📧\nLink copied to clipboard.`, { duration: 5000 });
+      } else {
+        toast.success(`Invitation link created and copied to clipboard! 📋\nShare it with ${inviteEmail}`, { duration: 5000 });
+      }
+
       setInviteEmail('');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to send invitation');

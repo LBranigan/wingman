@@ -354,19 +354,33 @@ router.post('/invite', authMiddleware, async (req, res) => {
 
     console.log('[INVITE] Invitation token generated and stored');
 
-    // Send invitation email
-    try {
-      await sendPartnerInvitation(email, currentUser.name, invitationToken);
-      console.log('[INVITE] Invitation email sent successfully');
-    } catch (emailError) {
-      console.error('[INVITE] Email send failed:', emailError.message);
-      // Continue anyway - token is stored
+    // Generate invitation URL
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const invitationUrl = `${frontendUrl}/register?inviteToken=${invitationToken}`;
+
+    // Try to send invitation email (non-blocking - don't wait for it)
+    const emailConfigured = process.env.EMAIL_USER && process.env.EMAIL_PASSWORD;
+    let emailSent = false;
+
+    if (emailConfigured) {
+      sendPartnerInvitation(email, currentUser.name, invitationToken)
+        .then(() => {
+          console.log('[INVITE] Invitation email sent successfully');
+        })
+        .catch((emailError) => {
+          console.error('[INVITE] Email send failed:', emailError.message);
+        });
+      emailSent = true;
+    } else {
+      console.log('[INVITE] Email not configured - skipping email send');
     }
 
     res.json({
-      message: 'Invitation sent successfully!',
+      message: emailSent ? 'Invitation sent successfully!' : 'Invitation link generated!',
       email,
-      invitedBy: currentUser.name
+      invitedBy: currentUser.name,
+      invitationUrl,
+      emailSent
     });
   } catch (error) {
     console.error('[INVITE] Error:', error);
