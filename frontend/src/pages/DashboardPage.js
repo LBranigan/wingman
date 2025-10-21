@@ -221,8 +221,16 @@ const DashboardPage = () => {
 
     try {
       const startDate = new Date();
-      const endDate = new Date(Date.now() + calculateDuration());
+      const calculatedDuration = calculateDuration();
+      const endDate = new Date(Date.now() + calculatedDuration);
       const duration = `${durationNumber} ${durationNumber > 1 ? `${durationUnit}s` : durationUnit}`;
+
+      console.log('[CREATE GOAL SET] Duration number:', durationNumber);
+      console.log('[CREATE GOAL SET] Duration unit:', durationUnit);
+      console.log('[CREATE GOAL SET] Calculated duration (ms):', calculatedDuration);
+      console.log('[CREATE GOAL SET] Start date:', startDate.toISOString());
+      console.log('[CREATE GOAL SET] End date:', endDate.toISOString());
+      console.log('[CREATE GOAL SET] Duration string:', duration);
 
       const response = await goalSetsApi.create({
         duration,
@@ -239,6 +247,8 @@ const DashboardPage = () => {
       setDurationUnit('week');
       toast.success(`Goal set created with ${validGoals.length} goal${validGoals.length > 1 ? 's' : ''}! 🎯`);
     } catch (err) {
+      console.error('[CREATE GOAL SET] Error:', err);
+      console.error('[CREATE GOAL SET] Error response:', err.response?.data);
       const errorMessage = err.response?.data?.error || 'Failed to create goal set';
       toast.error(errorMessage);
     }
