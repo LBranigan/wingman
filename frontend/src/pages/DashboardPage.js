@@ -213,7 +213,7 @@ const DashboardPage = () => {
     try {
       const startDate = new Date();
       const endDate = new Date(Date.now() + calculateDuration());
-      const duration = `${durationNumber} ${durationUnit}${durationNumber > 1 ? 's' : ''}`;
+      const duration = `${durationNumber} ${durationNumber > 1 ? `${durationUnit}s` : durationUnit}`;
 
       const response = await goalSetsApi.create({
         duration,
@@ -246,6 +246,8 @@ const DashboardPage = () => {
       endDate.setMonth(endDate.getMonth() + durationNumber);
       return endDate.getTime() - Date.now();
     }
+    // Default to weeks if somehow unit is invalid
+    return durationNumber * 7 * 24 * 60 * 60 * 1000;
   };
 
   const handleToggleGoal = async (goalId, setId) => {
