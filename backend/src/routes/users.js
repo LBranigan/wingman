@@ -18,26 +18,36 @@ router.get('/me', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Fetch all partners using new Partnership model
-    const partners = await getUserPartners(req.userId);
-
-    // Fetch pending invitations
-    const pendingInvitations = await getUserSentInvitations(req.userId);
-
     // Don't send password
     const { password, ...userWithoutPassword } = user;
 
-    // For backward compatibility, set `partner` to first partner if exists
-    const partner = partners.length > 0 ? partners[0] : null;
+    // Get partner using the old partnerId field (Partnership table doesn't exist yet)
+    let partner = null;
+    if (user.partnerId) {
+      partner = await prisma.user.findUnique({
+        where: { id: user.partnerId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          bio: true,
+          profilePicture: true,
+          createdAt: true
+        }
+      });
+    }
+
+    // Fetch pending invitations (this doesn't use Partnership table)
+    const pendingInvitations = await getUserSentInvitations(req.userId);
 
     res.json({
       ...userWithoutPassword,
-      partner,      // Single partner for backward compatibility
-      partners,     // Array of all partners
+      partner,            // Single partner for backward compatibility
+      partners: partner ? [partner] : [],  // Array format for future compatibility
       pendingInvitations  // Array of pending email invitations
     });
   } catch (error) {
-    console.error(error);
+    console.error('[USERS] Error in /me endpoint:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
