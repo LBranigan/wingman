@@ -737,19 +737,61 @@ const DashboardPage = () => {
           {dateRangeStep === 'unit' && (
             <div className="mb-6">
               <p className="text-gray-600 mb-3">Duration: {durationNumber}</p>
-              <div className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={durationUnit}
-                  readOnly
-                  onKeyDown={handleUnitKeyDown}
-                  className="px-4 py-2 text-2xl font-bold border-b-2 border-gray-300 focus:border-indigo-600 outline-none cursor-pointer"
-                  autoFocus
-                />
+              <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-3 gap-3">
+                  <button
+                    onClick={() => setDurationUnit('day')}
+                    className={`px-6 py-4 text-lg font-bold rounded-lg border-2 transition ${
+                      durationUnit === 'day'
+                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'
+                    }`}
+                  >
+                    Day{durationNumber > 1 ? 's' : ''}
+                  </button>
+                  <button
+                    onClick={() => setDurationUnit('week')}
+                    className={`px-6 py-4 text-lg font-bold rounded-lg border-2 transition ${
+                      durationUnit === 'week'
+                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'
+                    }`}
+                  >
+                    Week{durationNumber > 1 ? 's' : ''}
+                  </button>
+                  <button
+                    onClick={() => setDurationUnit('month')}
+                    className={`px-6 py-4 text-lg font-bold rounded-lg border-2 transition ${
+                      durationUnit === 'month'
+                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'
+                    }`}
+                  >
+                    Month{durationNumber > 1 ? 's' : ''}
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    setDateRangeStep('done');
+                    setActiveGoalIndex(0);
+                  }}
+                  className="px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition"
+                >
+                  Continue
+                </button>
               </div>
               <p className="text-sm text-gray-500 mt-2">
-                Type D/W/M or use arrow keys to select • Press Enter or Tab to continue
+                Select a time unit and click Continue
               </p>
+              {/* Hidden input for keyboard users */}
+              <input
+                type="text"
+                value={durationUnit}
+                readOnly
+                onKeyDown={handleUnitKeyDown}
+                className="opacity-0 w-0 h-0 absolute"
+                autoFocus
+              />
             </div>
           )}
 

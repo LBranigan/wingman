@@ -13,12 +13,17 @@ const getSortedUserIds = (id1, id2) => {
 // Get chat messages between current user and their partner
 router.get('/messages', authMiddleware, async (req, res) => {
   try {
+    console.log('[CHAT] GET /messages - User ID:', req.userId);
+
     const currentUser = await prisma.user.findUnique({
       where: { id: req.userId },
       select: { partnerId: true }
     });
 
-    if (!currentUser.partnerId) {
+    console.log('[CHAT] Current user partnerId:', currentUser?.partnerId);
+
+    if (!currentUser || !currentUser.partnerId) {
+      console.log('[CHAT] No partner found - returning 400');
       return res.status(400).json({ error: 'You must have a partner to access chat' });
     }
 
@@ -52,6 +57,8 @@ router.get('/messages', authMiddleware, async (req, res) => {
 // Send a message to partner
 router.post('/messages', authMiddleware, async (req, res) => {
   try {
+    console.log('[CHAT] POST /messages - User ID:', req.userId);
+
     const { text } = req.body;
 
     if (!text || !text.trim()) {
@@ -63,7 +70,10 @@ router.post('/messages', authMiddleware, async (req, res) => {
       select: { partnerId: true, name: true }
     });
 
-    if (!currentUser.partnerId) {
+    console.log('[CHAT] Current user partnerId:', currentUser?.partnerId);
+
+    if (!currentUser || !currentUser.partnerId) {
+      console.log('[CHAT] No partner found - returning 400');
       return res.status(400).json({ error: 'You must have a partner to send messages' });
     }
 
