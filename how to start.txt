@@ -1,0 +1,5 @@
+backend:
+bash   npm run dev
+
+frontend: 
+bash   npm start

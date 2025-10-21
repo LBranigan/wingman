@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(uuid())
+  email             String   @unique
+  password          String?
+  name              String
+  bio               String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // OAuth fields
+  googleId          String?  @unique
+  profilePicture    String?
+
+  // Matching relationship (each user stores their partner's ID)
+  partnerId         String?
+
+  matchedAt         DateTime?
+
+  // Partner invitation fields
+  invitationToken   String?  @unique
+  invitedBy         String?
+  invitationSentAt  DateTime?
+
+  // Password reset fields
+  resetToken        String?  @unique
+  resetTokenExpiry  DateTime?
+
+  // User's goals
+  goals             Goal[]
+  goalSets          GoalSet[]
+
+  // Comments on partner's goals
+  comments          Comment[]
+
+  // Partnership requests sent by this user
+  sentRequests      PartnershipRequest[] @relation("RequestSender")
+  // Partnership requests received by this user
+  receivedRequests  PartnershipRequest[] @relation("RequestReceiver")
+
+  // Chat messages sent by this user
+  sentMessages      Message[]
+}
+
+model PartnershipRequest {
+  id          String   @id @default(uuid())
+  status      String   @default("pending") // "pending", "accepted", "rejected"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  senderId    String
+  sender      User     @relation("RequestSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId  String
+  receiver    User     @relation("RequestReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId, status])
+}
+
+model GoalSet {
+  id            String    @id @default(uuid())
+  duration      String    // e.g., "1 week", "2 months"
+  startDate     DateTime
+  endDate       DateTime
+  isActive      Boolean   @default(true)
+  isCompleted   Boolean   @default(false)
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  goals         Goal[]
+
+  @@index([userId, isActive])
+}
+
+model Goal {
+  id          String    @id @default(uuid())
+  text        String
+  completed   Boolean   @default(false)
+  weekStart   DateTime
+  weekEnd     DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  goalSetId   String?
+  goalSet     GoalSet?  @relation(fields: [goalSetId], references: [id], onDelete: Cascade)
+
+  comments    Comment[]
+
+  @@index([userId, weekStart])
+  @@index([goalSetId])
+}
+
+model Comment {
+  id          String   @id @default(uuid())
+  text        String
+  createdAt   DateTime @default(now())
+
+  goalId      String
+  goal        Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  text        String
+  createdAt   DateTime @default(now())
+
+  senderId    String
+  sender      User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  // Store both partner IDs to make querying messages between two users easier
+  userId1     String   // Lower ID (alphabetically)
+  userId2     String   // Higher ID (alphabetically)
+
+  @@index([userId1, userId2, createdAt])
+}

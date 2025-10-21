@@ -1,0 +1,1 @@
+In this section you should be able to see and click into your partners goals. which will show his goals and notes. There should also be a "chat" section where the two partners can have general chat and reference the goal sets, including adding attachments like pictures or setting up video mettings in google.

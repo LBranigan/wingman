@@ -1,0 +1,3 @@
+matching:
+-this should be based on bio "compatability" (how is that determined?
+-there should be an option to send an email request to partner up with someone 

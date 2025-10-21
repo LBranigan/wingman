@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Font */
+@font-face {
+  font-family: 'NDot57Caps';
+  src: url('../public/fonts/NDot57Caps.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+* {
+  font-family: 'NDot57Caps', sans-serif !important;
+}
+
+/* Skeleton loader animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Fade in animation for goal sets */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtle pulse animation for habit cards */
+@keyframes subtlePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.005);
+    opacity: 0.98;
+  }
+}
+
+.animate-subtle-pulse {
+  animation: subtlePulse 4s ease-in-out infinite;
+}
+
+.animate-pulse {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Focus visible styles for accessibility */
+*:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* Smooth transitions for interactive elements */
+button,
+input,
+textarea,
+select,
+a {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Improve touch targets for mobile */
+@media (max-width: 768px) {
+  button,
+  a,
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

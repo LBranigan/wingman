@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/brani/Desktop/Temp/**)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(npm install:*)",
+      "Bash(mspaint.exe)",
+      "Read(//c/Users/brani/Desktop/**)",
+      "Bash(mkdir -p \"01-Product-Listings/3-Pack\" \"01-Product-Listings/12-Pack\" \"01-Product-Listings/Cheerwine\" \"01-Product-Listings/Coffee-Multipack\" \"01-Product-Listings/Lil-Goos-Tin\" \"01-Product-Listings/Templates\" \"02-Product-Images/3-Pack\" \"02-Product-Images/12-Pack\" \"02-Product-Images/Assorted-Tin\" \"02-Product-Images/Cheerwine\" \"02-Product-Images/Coffee\" \"02-Product-Images/Individual-Bars\" \"02-Product-Images/Lil-Goos\" \"02-Product-Images/Pecan\" \"03-Product-Info/Nutrition-Labels\" \"03-Product-Info/Specifications\" \"03-Product-Info/Product-Features\" \"04-Marketing-Materials/Brand-Registry\" \"04-Marketing-Materials/Value-Proposition\" \"04-Marketing-Materials/Presentations\" \"04-Marketing-Materials/SERPS-Analysis\" \"05-Sell-Sheets\" \"06-Documentation\" \"07-Customer-Service\" \"08-Analytics\" \"09-Reference\")",
+      "Bash(cp -r \"3 pack listings/\"*.xlsm \"3 pack listings/\"*.txt \"01-Product-Listings/3-Pack/\")",
+      "Bash(cp -r \"3 pack listings/images/\"* \"02-Product-Images/3-Pack/\")",
+      "Bash(cp cheerwine*.csv cheerwine*.xlsm \"01-Product-Listings/Cheerwine/\")",
+      "Bash(cp \"Cheerwine pictures/\"* \"02-Product-Images/Cheerwine/\")",
+      "Bash(cp NEW-TEMPLATE*.* \"NEWEST FMAILY VARIATION TEMPLATE.\"* lilgoostemplate.* GooGoo-UPDATED.* \"01-Product-Listings/Templates/\")",
+      "Bash(cp \"GooGoo Images/\"*12-pack*.* \"02-Product-Images/12-Pack/\")",
+      "Bash(cp \"GooGoo Images/\"*3-pack*.* \"02-Product-Images/3-Pack/\")",
+      "Bash(cp \"GooGoo Images/\"*Tin*.* \"02-Product-Images/Assorted-Tin/\")",
+      "Bash(cp \"GooGoo Images/\"*individual*.tif \"GooGoo Images/\"*closeup*.jpg googoo*.jpg \"02-Product-Images/Individual-Bars/\")",
+      "Bash(cp \"GooGoo Images/\"*Nutrition*.jpeg \"GooGoo Images/tin-nutrition.jpg\" \"03-Product-Info/Nutrition-Labels/\")",
+      "Bash(cp \"GooGoo Images/\"*.pdf \"GooGoo Images/\"*.png \"GooGoo Images/\"*.jpg \"02-Product-Images/12-Pack/\")",
+      "Bash(cp \"NEW Goo Goo Images/\"*pecan*.* \"02-Product-Images/Pecan/\")",
+      "Bash(npx prisma migrate:*)",
+      "Bash(npx prisma db push)",
+      "Bash(npx prisma db push:*)",
+      "Bash(node src/scripts/checkPartnerData.js:*)",
+      "Bash(node:*)",
+      "Bash(npm start)",
+      "WebFetch(domain:user-gen-media-assets.s3.amazonaws.com)",
+      "Bash(netstat:*)",
+      "Bash(python:*)",
+      "Bash(taskkill //F //PID 8108)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
